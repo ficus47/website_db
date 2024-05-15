@@ -29,29 +29,36 @@ def preprocess_image(file):
     return img_array
 
 def verifie():
-  b, c = 0, 0
-  model = load_model("model.h5")
-  for i in os.listdir("sortie"):
-    img = preprocess_image("sortie/" + i)
-    b += model.predict(img)[0][0]
-    c += 1
+    b, c = 0, 0
+    model = load_model("model.h5")
+    for i in os.listdir("sortie"):
+        img = preprocess_image("sortie/" + i)
+        b += model.predict(img)[0][0]
+        c += 1
     
-  if b/c > 0.55:
-     return 1
-  else:
-     return 0
+    if b/c > 0.55:
+        return 1
+    else:
+        return 0
 
 s = sk.gethostbyname(sk.gethostname())
+print(s, 1059)
 sock = sk.socket()
-sock.bind((s, 1024))
+sock.bind((s, 1059))
 sock.listen()
 
 while True:
-    s, a = sock.recv()
-    data = s
-    open("video.mp4", "w").write()
-    decouper_video_en_images()
+    d, a = sock.accept()
+    with open("video.mp4", "wb") as f:
+        while True:
+            data = d.recv(4096)
+            if not data:
+                break
+            f.write(data)
+    decouper_video_en_images("video.mp4", "sortie")
     x = verifie()
-    s.send(x.to_bytes(x))
+    d.send(str(x).encode())  # Envoyer la réponse en tant que chaîne de caractères
+    d.close()  # Fermer le socket accepté après avoir envoyé la réponse
+    break
 
 sock.close()
