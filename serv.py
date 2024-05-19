@@ -17,7 +17,8 @@ def decouper_video_en_images(video_path, output_folder):
     for i, frame in enumerate(video.iter_frames()):
         # Enregistrer la trame sous forme d'image
         frame_path = os.path.join(output_folder, f"frame_{i}.png")
-        frame.save_frame(frame_path)
+        video.save_frame(frame_path, t=i / video.fps)  # Utilisez save_frame() avec le temps de la trame
+        print(f"Enregistrement de la trame {i + 1}/{video.duration * video.fps}")
 
     # Fermer la vidéo
     video.close()
@@ -42,16 +43,18 @@ def verifie():
         return 0
 
 s = sk.gethostbyname(sk.gethostname())
-print(s, 1059)
+print(s, 1025)
 sock = sk.socket()
-sock.bind((s, 1059))
+sock.bind((s, 1025))
 sock.listen()
+
+decouper_video_en_images("video.mp4", "sortie")
 
 while True:
     d, a = sock.accept()
     with open("video.mp4", "wb") as f:
         while True:
-            data = d.recv(4096)
+            data = d.recv(4096*2*2)
             if not data:
                 break
             f.write(data)
