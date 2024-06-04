@@ -1,9 +1,11 @@
-import socket as sk
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 import numpy as np
 import os
 from moviepy.editor import VideoFileClip
+import asyncio
+import websockets
+import socket
 
 def decouper_video_en_images(video_path, output_folder):
     # Assurez-vous que le dossier de sortie existe
@@ -42,26 +44,22 @@ def verifie():
     else:
         return 0
 
-s = sk.gethostbyname(sk.gethostname())
-print(s, 1025)
-sock = sk.socket()
-sock.bind((s, 1025))
-sock.listen()
+print(socket.gethostbyname(socket.gethostname()))
 
-decouper_video_en_images("video.mp4", "sortie")
 
-while True:
-    d, a = sock.accept()
+async def serv(a):
     with open("video.mp4", "wb") as f:
-        while True:
-            data = d.recv(4096*2*2)
-            if not data:
-                break
-            f.write(data)
+        f.write(a)
     decouper_video_en_images("video.mp4", "sortie")
     x = verifie()
-    d.send(str(x).encode())  # Envoyer la réponse en tant que chaîne de caractères
-    d.close()  # Fermer le socket accepté après avoir envoyé la réponse
-    break
+    return x
 
-sock.close()
+async def echo(websocket, path):
+    async for message in websocket:
+        await websocket.send(serv(message))
+
+async def main():
+    async with websockets.serve(echo, socket.gethostbyname(socket.gethostname()), 8765):
+        await asyncio.Future() 
+
+asyncio.run(main())
