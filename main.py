@@ -1,3 +1,8 @@
+
+import pip
+
+pip.main("install moviepy tensorflow websocket".split())
+
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.models import load_model
 import numpy as np
@@ -5,7 +10,6 @@ import os
 from moviepy.editor import VideoFileClip
 import asyncio
 import websockets
-import socket
 import socket
 
 def get_local_ip_address():
